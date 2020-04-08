@@ -30,12 +30,16 @@ const createCodeDeltaUrl = ({
   `https://api.github.com/repos/${githubOwner}/${githubRepo}/compare/${startReleaseTag}...${endReleaseTag}`;
 
 // Get request
-const getCommitsBetweenReleases = async (url: string) => {
+const getCommitsBetweenReleases = async (url: string, token: string) => {
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `token ${token}`,
+      },
+    });
     return response.data.commits;
   } catch {
-    console.log(`error getting: ${url} `);
+    throw new Error(`error getting: ${url} `);
   }
 };
 
@@ -51,32 +55,42 @@ const getCommitsBetweenReleases = async (url: string) => {
     endReleaseTag,
   });
 
-  const commits = await getCommitsBetweenReleases(codeDeltaUrl);
+  try {
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
-  const jiraTicketRegex = new RegExp(`(^${jiraTicketPrefix}-\\d*)`);
+    if (!GITHUB_TOKEN) {
+      throw new Error('No GitHub token provided');
+    }
 
-  const functialDelta = commits
-    .map(({ commit }: any) => {
-      return commit.message;
-    })
-    .filter((message: string) => {
-      return jiraTicketRegex.test(message);
-    })
-    .map((message: string) => {
-      const prismCommits = message.match(jiraTicketRegex);
-      if (prismCommits !== null) {
-        return prismCommits[0];
-      }
-      return message;
-    });
+    const commits = await getCommitsBetweenReleases(codeDeltaUrl, GITHUB_TOKEN);
 
-  console.log(`
+    const jiraTicketRegex = new RegExp(`(^${jiraTicketPrefix}-\\d*)`);
+
+    const functialDelta = commits
+      .map(({ commit }: any) => {
+        return commit.message;
+      })
+      .filter((message: string) => {
+        return jiraTicketRegex.test(message);
+      })
+      .map((message: string) => {
+        const prismCommits = message.match(jiraTicketRegex);
+        if (prismCommits !== null) {
+          return prismCommits[0];
+        }
+        return message;
+      });
+
+    console.log(`
   *Code Delta*
   ${codeDeltaUrl}
   
   *Functional Delta*
   ${functialDelta.join('\n  ')}
   `);
+  } catch (e) {
+    console.log(e.message);
+  }
 
   return null;
 })();
