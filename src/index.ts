@@ -1,6 +1,7 @@
 import axios from 'axios';
 import prompts from 'prompts';
 import loadDotFile from './loadDotFile';
+import { getFunctionalDelta } from './utils';
 
 // CLI
 const questions = [
@@ -66,20 +67,7 @@ const getCommitsBetweenReleases = async (url: string, token: string) => {
 
     const jiraTicketRegex = new RegExp(`(^${jiraTicketPrefix}-\\d*)`);
 
-    const functialDelta = commits
-      .map(({ commit }: any) => {
-        return commit.message;
-      })
-      .filter((message: string) => {
-        return jiraTicketRegex.test(message);
-      })
-      .map((message: string) => {
-        const prismCommits = message.match(jiraTicketRegex);
-        if (prismCommits !== null) {
-          return prismCommits[0];
-        }
-        return message;
-      });
+    const functialDelta = getFunctionalDelta(commits, jiraTicketRegex);
 
     console.log(`
   *Code Delta*
