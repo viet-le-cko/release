@@ -5,7 +5,6 @@ import prompts from 'prompts';
 interface Config {
   githubRepo: string;
   githubOwner: string;
-  jiraTicketPrefix: string;
 }
 
 const questions = [
@@ -40,20 +39,16 @@ export default async function() {
           resolve({
             githubRepo: config['github-repo'],
             githubOwner: config['github-owner'],
-            jiraTicketPrefix: config['jira-ticket-prefix'],
           });
         });
       } else {
         // we are going to create one using prompts
 
-        const { githubRepo, githubOwner, jiraTicketPrefix } = await prompts(
-          questions as any
-        );
+        const { githubRepo, githubOwner } = await prompts(questions as any);
 
         const config = {
           'github-repo': githubRepo,
           'github-owner': githubOwner,
-          'jira-ticket-prefix': jiraTicketPrefix,
         };
 
         fs.writeFile(releaseFilePath, JSON.stringify(config), function(err) {
@@ -66,7 +61,6 @@ export default async function() {
           resolve({
             githubRepo: config['github-repo'],
             githubOwner: config['github-owner'],
-            jiraTicketPrefix: config['jira-ticket-prefix'],
           });
         });
       }
