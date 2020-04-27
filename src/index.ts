@@ -17,7 +17,7 @@ const questions = [
   },
 ];
 
-const createCodeDeltaUrl = ({
+const createCodeDeltaUrls = ({
   githubOwner,
   githubRepo,
   startReleaseTag,
@@ -27,8 +27,10 @@ const createCodeDeltaUrl = ({
   githubRepo: string;
   startReleaseTag: string;
   endReleaseTag: string;
-}) =>
-  `https://api.github.com/repos/${githubOwner}/${githubRepo}/compare/${startReleaseTag}...${endReleaseTag}`;
+}) => ({
+  api: `https://api.github.com/repos/${githubOwner}/${githubRepo}/compare/${startReleaseTag}...${endReleaseTag}`,
+  website: `https://github.com/${githubOwner}/${githubRepo}/compare/${startReleaseTag}...${endReleaseTag}`,
+});
 
 // Get request
 const getCommitsBetweenReleases = async (url: string, token: string) => {
@@ -49,7 +51,7 @@ const getCommitsBetweenReleases = async (url: string, token: string) => {
 
   const { startReleaseTag, endReleaseTag } = await prompts(questions as any);
 
-  const codeDeltaUrl = createCodeDeltaUrl({
+  const githubUrls = createCodeDeltaUrls({
     githubOwner,
     githubRepo,
     startReleaseTag,
@@ -63,7 +65,10 @@ const getCommitsBetweenReleases = async (url: string, token: string) => {
       throw new Error('No GitHub token provided');
     }
 
-    const commits = await getCommitsBetweenReleases(codeDeltaUrl, GITHUB_TOKEN);
+    const commits = await getCommitsBetweenReleases(
+      githubUrls.api,
+      GITHUB_TOKEN
+    );
 
     const jiraTicketRegex = new RegExp(`(^${jiraTicketPrefix}-\\d*)`);
 
@@ -71,7 +76,7 @@ const getCommitsBetweenReleases = async (url: string, token: string) => {
 
     console.log(`
   *Code Delta*
-  ${codeDeltaUrl}
+  ${githubUrls.website}
   
   *Functional Delta*
   ${functialDelta.join('\n  ')}
