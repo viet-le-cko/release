@@ -1,7 +1,7 @@
 import axios from 'axios';
 import prompts from 'prompts';
 import loadDotFile from './loadDotFile';
-import { getFunctionalDelta } from './utils';
+import { getFunctionalDelta, printOut } from './utils';
 
 // CLI
 const questions = [
@@ -47,7 +47,7 @@ const getCommitsBetweenReleases = async (url: string, token: string) => {
 };
 
 (async () => {
-  const { githubOwner, githubRepo, jiraTicketPrefix } = await loadDotFile();
+  const { githubOwner, githubRepo } = await loadDotFile();
 
   const { startReleaseTag, endReleaseTag } = await prompts(questions as any);
 
@@ -70,17 +70,9 @@ const getCommitsBetweenReleases = async (url: string, token: string) => {
       GITHUB_TOKEN
     );
 
-    const jiraTicketRegex = new RegExp(`(^${jiraTicketPrefix}-\\d*)`);
+    const functialDelta = getFunctionalDelta(commits);
 
-    const functialDelta = getFunctionalDelta(commits, jiraTicketRegex);
-
-    console.log(`
-  *Code Delta*
-  ${githubUrls.website}
-  
-  *Functional Delta*
-  ${functialDelta.join('\n  ')}
-  `);
+    printOut(githubUrls.website, functialDelta.join('\n'));
   } catch (e) {
     console.log(e.message);
   }

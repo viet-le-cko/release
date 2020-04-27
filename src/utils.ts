@@ -1,18 +1,32 @@
-export const getFunctionalDelta = (commits: any, jiraTicketRegex: RegExp) => {
-  const delta = commits
+const jiraRegex = /((?!([A-Z0-9a-z]{1,10})-?$)[A-Z]{1}[A-Z0-9]+-\d+)/gm;
+
+export const getFunctionalDelta = (commits: any) => {
+  let tickets: string[] = [];
+
+  commits
     .map(({ commit }: any) => {
       return commit.message;
     })
     .filter((message: string) => {
-      return jiraTicketRegex.test(message);
+      return jiraRegex.test(message);
     })
-    .map((message: string) => {
-      const prismCommits = message.match(jiraTicketRegex);
-      if (prismCommits !== null) {
-        return prismCommits[0];
+    .forEach((message: string) => {
+      const ticketMatches = message.match(jiraRegex);
+
+      if (ticketMatches !== null) {
+        tickets = [...tickets, ...ticketMatches];
       }
-      return message;
     });
 
-  return Array.from(new Set(delta));
+  return Array.from(new Set(tickets));
+};
+
+export const printOut = (codeDelta: string, functionalDelta: string) => {
+  console.log(`
+*Code Delta*
+${codeDelta}
+
+*Functional Delta*
+${functionalDelta}
+`);
 };
