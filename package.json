@@ -1,11 +1,12 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
     "dist",
-    "src"
+    "src",
+    "bin"
   ],
   "engines": {
     "node": ">=10"
@@ -29,7 +30,7 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "release",
+  "name": "@cko/release",
   "author": "Viet",
   "module": "dist/release.esm.js",
   "devDependencies": {
@@ -46,5 +47,8 @@
     "path": "^0.12.7",
     "prompt": "^1.0.0",
     "require-dot-file": "^0.4.0"
+  },
+  "bin": {
+    "release": "./bin/release"
   }
 }

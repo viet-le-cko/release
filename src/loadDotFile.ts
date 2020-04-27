@@ -18,11 +18,6 @@ const questions = [
     name: 'githubOwner',
     message: 'Who is the github owner?',
   },
-  {
-    type: 'text',
-    name: 'jiraTicketPrefix',
-    message: 'What is the jira ticket prefix?',
-  },
 ];
 
 export default async function() {
