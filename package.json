@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.8.0",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -41,14 +41,16 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.150",
     "@types/prompts": "^2.0.5",
     "axios": "^0.19.2",
     "fs": "^0.0.1-security",
+    "lodash": "^4.17.15",
     "path": "^0.12.7",
     "prompt": "^1.0.0",
     "require-dot-file": "^0.4.0"
   },
   "bin": {
-    "release": "./bin/release"
+    "cko-release": "./bin/cko-release"
   }
 }

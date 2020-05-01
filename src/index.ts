@@ -1,7 +1,11 @@
-import axios from 'axios';
 import prompts from 'prompts';
 import loadDotFile from './loadDotFile';
-import { getFunctionalDelta, printOut } from './utils';
+import { getFunctionalDelta, printOut, getShas } from './utils';
+import {
+  createCodeDeltaUrls,
+  getCommitsBetweenReleases,
+  getPullRequestsMessages,
+} from './github';
 
 // CLI
 const questions = [
@@ -16,35 +20,6 @@ const questions = [
     message: 'What is the release tag you want to end to?',
   },
 ];
-
-const createCodeDeltaUrls = ({
-  githubOwner,
-  githubRepo,
-  startReleaseTag,
-  endReleaseTag,
-}: {
-  githubOwner: string;
-  githubRepo: string;
-  startReleaseTag: string;
-  endReleaseTag: string;
-}) => ({
-  api: `https://api.github.com/repos/${githubOwner}/${githubRepo}/compare/${startReleaseTag}...${endReleaseTag}`,
-  website: `https://github.com/${githubOwner}/${githubRepo}/compare/${startReleaseTag}...${endReleaseTag}`,
-});
-
-// Get request
-const getCommitsBetweenReleases = async (url: string, token: string) => {
-  try {
-    const response = await axios.get(url, {
-      headers: {
-        Authorization: `token ${token}`,
-      },
-    });
-    return response.data.commits;
-  } catch {
-    throw new Error(`error getting: ${url} `);
-  }
-};
 
 (async () => {
   const { githubOwner, githubRepo } = await loadDotFile();
@@ -70,7 +45,14 @@ const getCommitsBetweenReleases = async (url: string, token: string) => {
       GITHUB_TOKEN
     );
 
-    const functialDelta = getFunctionalDelta(commits);
+    const shas = getShas(commits);
+
+    const messages = await getPullRequestsMessages(
+      { githubOwner, githubRepo, shas },
+      GITHUB_TOKEN
+    );
+
+    const functialDelta = getFunctionalDelta(messages);
 
     printOut(githubUrls.website, functialDelta.join('\n'));
   } catch (e) {
