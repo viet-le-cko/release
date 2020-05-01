@@ -85,8 +85,10 @@ export const getPullRequestsMessages = async (
     const prs = await batchPullRequest(prUrls, token);
 
     for (let pr of prs as any) {
-      const body = pr[0].body;
-      prMessages = [...prMessages, body];
+      if (pr[0]) {
+        const body = pr[0].body;
+        prMessages = [...prMessages, body];
+      }
     }
   }
 
